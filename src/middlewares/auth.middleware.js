@@ -1,42 +1,60 @@
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
-import asyncHandler from "../utils/asyncHandler.js";
 
-export const protect = asyncHandler(async (req, res, next) => {
-  const authorization = req.headers.authorization;
-  const token = authorization?.startsWith("Bearer ")
-    ? authorization.slice(7)
-    : null;
-  if (!token)
-    return res
-      .status(401)
-      .json({ success: false, message: "Authentication required" });
-  if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET is required");
-  let decoded;
-  try {
-    decoded = jwt.verify(token, process.env.JWT_SECRET);
-  } catch {
-    return res
-      .status(401)
-      .json({ success: false, message: "Invalid or expired token" });
-  }
-  const user = await User.findById(decoded.id);
-  if (!user)
-    return res
-      .status(401)
-      .json({ success: false, message: "Account no longer exists" });
-  req.user = user;
-  next();
-});
+/**
+ * Middleware to protect routes and authenticate JWT
+ */
+export async function protect(req, res, next) {
+	try {
+		let token;
 
+		if (
+			req.headers.authorization &&
+			req.headers.authorization.startsWith("Bearer")
+		) {
+			token = req.headers.authorization.split(" ")[1];
+		}
+
+		if (!token) {
+			return res.status(401).json({
+				success: false,
+				message: "Not authorized to access this route, token missing",
+			});
+		}
+
+		const secret = process.env.JWT_SECRET || "default_jwt_secret_key";
+		const decoded = jwt.verify(token, secret);
+
+		const user = await User.findById(decoded.id).select("-password");
+		if (!user) {
+			return res.status(401).json({
+				success: false,
+				message: "The user belonging to this token no longer exists",
+			});
+		}
+
+		req.user = user;
+		next();
+	} catch (error) {
+		return res.status(401).json({
+			success: false,
+			message: "Not authorized, invalid or expired token",
+			error: error.message,
+		});
+	}
+}
+
+/**
+ * Middleware to restrict access to specific roles (e.g. admin)
+ */
 export function authorize(...roles) {
-  return (req, res, next) => {
-    if (!req.user || !roles.includes(req.user.role)) {
-      return res.status(403).json({
-        success: false,
-        message: "You are not allowed to access this resource",
-      });
-    }
-    next();
-  };
+	return (req, res, next) => {
+		if (!req.user || !roles.includes(req.user.role)) {
+			return res.status(403).json({
+				success: false,
+				message: `User role '${req.user?.role || "guest"}' is not authorized to access this resource`,
+			});
+		}
+		next();
+	};
 }

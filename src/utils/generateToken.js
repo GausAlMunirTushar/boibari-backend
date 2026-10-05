@@ -1,10 +1,18 @@
 import jwt from "jsonwebtoken";
 
-export default function generateToken(userId) {
-  if (!process.env.JWT_SECRET) {
-    throw new Error("JWT_SECRET is required");
-  }
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
-  });
+/**
+ * Generates a signed JWT token for a user
+ * @param {string} userId
+ * @param {string} role
+ * @returns {string}
+ */
+export function generateToken(userId, role = "customer") {
+	const secret = process.env.JWT_SECRET || "default_jwt_secret_key";
+	const expiresIn = process.env.JWT_EXPIRES_IN || "7d";
+
+	return jwt.sign({ id: userId, role }, secret, {
+		expiresIn,
+	});
 }
+
+export default generateToken;
