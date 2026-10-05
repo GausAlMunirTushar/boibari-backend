@@ -2,9 +2,12 @@ import mongoose from "mongoose";
 
 async function connectDatabase() {
 	try {
-		const uri = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/boibari";
+		const uri = process.env.MONGODB_URI;
+		if (!uri) {
+			throw new Error("MONGODB_URI is not defined");
+		}
 		const conn = await mongoose.connect(uri);
-		console.log(`MongoDB Connected: ${conn.connection.host}`);
+		console.log(`MongoDB Connected`);
 	} catch (error) {
 		console.error("MongoDB Connection Failed:", error.message);
 	}

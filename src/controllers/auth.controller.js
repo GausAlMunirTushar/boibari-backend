@@ -1,4 +1,4 @@
-import bcrypt from "bcryptjs";
+import bcrypt, { decodeBase64 } from "bcryptjs";
 import User from "../models/user.model.js";
 import generateToken from "../utils/generateToken.js";
 
@@ -7,21 +7,31 @@ import generateToken from "../utils/generateToken.js";
  * @route   POST /api/v1/auth/register
  * @access  Public
  */
+/**
+ * register
+ * login
+ * forgot-password
+ * reset-password
+ * update-password
+ * otp-verify
+ * mai-verify
+ */
+
 export async function register(req, res) {
 	try {
 		const { name, email, phone, password } = req.body;
 
+		// Validation
 		if (!name || !email || !phone || !password) {
 			return res.status(400).json({
 				success: false,
 				message: "Name, email, phone, and password are required",
 			});
 		}
-
 		if (password.length < 8) {
 			return res.status(400).json({
 				success: false,
-				message: "Password must be at least 8 characters long",
+				message: "Password must be at least 8 characters",
 			});
 		}
 
@@ -50,9 +60,9 @@ export async function register(req, res) {
 			phone,
 			password: hashedPassword,
 		});
-
+		
 		// Generate JWT token
-		const token = generateToken(user._id, user.role);
+		const token = generateToken(user._id);
 
 		return res.status(201).json({
 			success: true,
@@ -79,20 +89,21 @@ export async function register(req, res) {
  */
 export async function login(req, res) {
 	try {
-		const { email, phone, password } = req.body;
+		const { email, password } = req.body;
 
-		if ((!email && !phone) || !password) {
+		if (!email || !password) {
 			return res.status(400).json({
 				success: false,
-				message: "Please provide email/phone and password",
+				message: "Please provide email and password",
 			});
+
 		}
-
-		// Find user by email or phone
+		
+		// Find user by email
 		const user = await User.findOne({
-			$or: [{ email }, { phone }],
+			email: email.toLowerCase(),
 		});
-
+		
 		if (!user) {
 			return res.status(404).json({
 				success: false,
@@ -111,7 +122,7 @@ export async function login(req, res) {
 		}
 
 		// Generate token
-		const token = generateToken(user._id, user.role);
+		const token = generateToken(user._id);
 
 		return res.status(200).json({
 			success: true,

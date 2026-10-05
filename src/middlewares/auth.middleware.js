@@ -3,6 +3,7 @@ import User from "../models/user.model.js";
 
 /**
  * Middleware to protect routes and authenticate JWT
+ * Authentication
  */
 export async function protect(req, res, next) {
 	try {
@@ -22,7 +23,7 @@ export async function protect(req, res, next) {
 			});
 		}
 
-		const secret = process.env.JWT_SECRET || "default_jwt_secret_key";
+		const secret = process.env.JWT_SECRET 
 		const decoded = jwt.verify(token, secret);
 
 		const user = await User.findById(decoded.id).select("-password");
@@ -46,6 +47,7 @@ export async function protect(req, res, next) {
 
 /**
  * Middleware to restrict access to specific roles (e.g. admin)
+ * Authrization
  */
 export function authorize(...roles) {
 	return (req, res, next) => {

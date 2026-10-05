@@ -26,7 +26,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Health check route
 app.get("/health", (req, res) => {
-	res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+	res.status(200).json({ status: "ok", message: "Boibari backend is running" });
 });
 
 // API Routes
