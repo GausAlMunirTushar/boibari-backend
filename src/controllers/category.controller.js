@@ -3,13 +3,10 @@ import Category from "../models/category.model.js";
 /**
  * Helper: convert a string into a URL-friendly slug
  */
-const slugify = (value) =>
-	String(value)
-		.trim()
-		.toLowerCase()
-		.replace(/[^a-z0-9]+/g, "-")
-		.replace(/^-|-$/g, "");
+const slugify = (value) => String(value).trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
+slugify("Gaus Al Munir ")
+// " Gaus Al Munir " = "gaus-al-munir"
 /**
  * @desc    Get all active categories
  * @route   GET /api/v1/categories
@@ -43,7 +40,7 @@ export async function listCategories(req, res) {
  */
 export async function createCategory(req, res) {
 	try {
-		const { name, slug, description } = req.body;
+		const { name, slug } = req.body;
 
 		if (!name) {
 			return res.status(400).json({
@@ -55,7 +52,6 @@ export async function createCategory(req, res) {
 		const category = await Category.create({
 			name,
 			slug: slug ? slugify(slug) : slugify(name),
-			description,
 		});
 
 		return res.status(201).json({

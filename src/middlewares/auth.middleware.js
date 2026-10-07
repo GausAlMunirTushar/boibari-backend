@@ -60,3 +60,5 @@ export function authorize(...roles) {
 		next();
 	};
 }
+
+// authorize("customer", "admin")

@@ -6,7 +6,7 @@ const bookSchema = new mongoose.Schema(
 			type: String,
 			required: [true, "Book title is required"],
 			trim: true,
-			maxlength: [240, "Title cannot exceed 240 characters"],
+			maxlength: [350, "Title cannot exceed 350 characters"],
 		},
 		slug: {
 			type: String,
@@ -42,7 +42,7 @@ const bookSchema = new mongoose.Schema(
 		language: {
 			type: String,
 			trim: true,
-			default: "Bangla",
+			default: "English",
 		},
 		edition: {
 			type: String,
@@ -61,7 +61,7 @@ const bookSchema = new mongoose.Schema(
 		price: {
 			type: Number,
 			required: [true, "Book price is required"],
-			min: [0, "Price cannot be negative"],
+			min: [0, "Price cannot be negative"], 
 		},
 		salePrice: {
 			type: Number,
